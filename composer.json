@@ -5,7 +5,8 @@
     "keywords": ["nooku", "foursquare", "component"],
     "license": "GPL",
     "require": {
-        "nooku/installer": "dev-develop"
+        "nooku/installer": "dev-develop",
+        "hownowstephen/php-foursquare": "dev-master"
     },
     "autoload": {
         "files": ["autoload.php"]
