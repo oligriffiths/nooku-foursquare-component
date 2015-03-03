@@ -1,0 +1,13 @@
+{
+    "name": "oligriffiths/nooku-foursquare-component",
+    "description": "A foursquare component for the Nooku Platform",
+    "type": "nooku-component",
+    "keywords": ["nooku", "foursquare", "component"],
+    "license": "GPL",
+    "require": {
+        "nooku/installer": "dev-develop"
+    },
+    "autoload": {
+        "files": ["autoload.php"]
+    }
+}
