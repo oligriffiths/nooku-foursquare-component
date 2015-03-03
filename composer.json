@@ -6,7 +6,7 @@
     "license": "GPL",
     "require": {
         "nooku/installer": "dev-develop",
-        "hownowstephen/php-foursquare": "dev-master"
+        "jcroll/foursquare-api-client": "dev-master"
     },
     "autoload": {
         "files": ["autoload.php"]

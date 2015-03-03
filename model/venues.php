@@ -8,80 +8,89 @@
 namespace Oligriffiths\Component\Foursquare;
 
 use Nooku\Library;
+use Jcroll\FoursquareApiClient\Client\FoursquareClient;
+
 
 class ModelVenues extends Library\ModelAbstract
 {
-	protected $_factory;
-    protected $_row;
-    protected $_rowset;
+    /**
+     * @var FoursquareClient
+     */
+    protected $_client;
 
-	public function __construct(Library\ObjectConfig $config)
-	{
-		parent::__construct($config);
+    /**
+     * @var
+     */
+    protected $_data;
 
-		$this->getState()
-			->insert('id','string',null, true)
-			->insert('latitude','string')
-			->insert('longitude','string')
-			->insert('ll','string')
-			->insert('query','string')
-			->insert('search','string')             //alias to query
-			->insert('radius','int', 1000)
-			->insert('intent','string', 'global')   //checkin, browse, global, match
-			->insert('near','string')
-			->insert('limit','int', 10)
-			->insert('ne','float')
-			->insert('sw','float')
-			->insert('categoryId','int')
-			->insert('url','string')
-			->insert('linkedId','int')
-			->insert('providerId','int');
-	}
+    public function __construct(Library\ObjectConfig $config)
+    {
+        parent::__construct($config);
 
-	protected function _initialize(Library\ObjectConfig $config)
-	{
-		$config->append(array(
-			'client_id' => '',
-			'client_secret' => '',
-			'token' => null,
-			'redirect_url' => null
-		));
+        $this->getState()
+            ->insert('id','string',null, true)
+            ->insert('latitude','string')
+            ->insert('longitude','string')
+            ->insert('ll','string')
+            ->insert('query','string')
+            ->insert('radius','int')
+            ->insert('intent','string', 'browse')   //checkin, browse, global, match
+            ->insert('near','string')
+            ->insert('limit','int', 10)
+            ->insert('ne','float')
+            ->insert('sw','float')
+            ->insert('categoryId','alnum')
+            ->insert('url','string')
+            ->insert('linkedId','int')
+            ->insert('providerId','int');
 
-		parent::_initialize($config);
-	}
+        $this->_client = $config->client;
+    }
 
 
-	protected function getFactory()
-	{
-		if(!$this->_factory){
-			$client = new \TheTwelve\Foursquare\HttpClient\CurlHttpClient();
-			$client->setVerifyPeer(false);
-			$redirector = new \TheTwelve\Foursquare\Redirector\HeaderRedirector();
-			$this->_factory = new \TheTwelve\Foursquare\ApiGatewayFactory($client, $redirector);
+    protected function _initialize(Library\ObjectConfig $config)
+    {
+        $config->append(array(
+            'client_id' => '',
+            'client_secret' => '',
+            'token' => null,
+            'redirect_url' => null,
+            'client' => null
+        ));
 
-			$this->_factory->setClientCredentials($this->getConfig()->client_id, $this->getConfig()->client_secret);
-			$this->_factory->setToken($this->getConfig()->token);
-		}
+        parent::_initialize($config);
+    }
 
-		return $this->_factory;
-	}
+    /**
+     * Gets the foursquare client
+     *
+     * @return FoursquareClient
+     */
+    protected function getClient()
+    {
+        if(!$this->_client){
 
-	protected function getGateway()
-	{
-		return $this->getFactory()->getVenuesGateway();
-	}
+            $this->_client = $this->getObject('com://oligriffiths/foursquare.helper.client', array(
+                'client_id' => $this->getConfig()->client_id,
+                'client_secret' => $this->getConfig()->client_secret,
+                'token' => $this->getConfig()->token
+            ));
+        }
 
+        return $this->_client;
+    }
 
-	protected function login()
-	{
-		$auth = $this->getFactory()->getAuthenticationGateway(
-			'https://foursquare.com/oauth2/authorize',
-			'https://foursquare.com/oauth2/access_token',
-			$this->getConfig()->redirect_url
-		);
+    /**
+     * Resets the model & clears cached data
+     *
+     * @param ModelContext $context
+     */
+    protected function _actionReset(Library\ModelContext $context)
+    {
+        parent::_actionReset($context);
 
-		$auth->initiateLogin();
-	}
+        $this->_data = null;
+    }
 
     /**
      * Fetch a new entity from the data source
@@ -91,82 +100,65 @@ class ModelVenues extends Library\ModelAbstract
      */
     protected function _actionFetch(Library\ModelContext $context)
     {
-        if($this->getState()->isUnique()){
-            return $this->getRow($context);
-        }else{
-            return $this->getRowset($context);
+        if(!$this->_data){
+            if($this->getState()->isUnique()){
+                $this->_data = $this->getVenue($context);
+            }else{
+                $this->_data =  $this->getVenues($context);
+            }
         }
+
+        return $this->_data;
     }
 
+    /**
+     * Gets a single venue by ID
+     *
+     * @param Library\ModelContext $context
+     * @return Callable|Library\ObjectInterface
+     */
+    protected function getVenue(Library\ModelContext $context)
+    {
+        try{
+            $response = $this->getClient()->getCommand('venues', array('venue_id' => $this->getState()->id))->execute();
+            $venue = isset($response['response']) && isset($response['response']['venue']) ? $response['response']['venue'] : array();
+        }catch(\Exception $e){
+            $venue = array();
+        }
 
+        $options = array(
+            'identity_key' => $context->getIdentityKey(),
+            'data' => $venue
+        );
 
-    protected function getRow(Library\ModelContext $context)
-	{
-		if(!$this->_row){
-			$state = $this->getState();
+        return $this->getObject('com:foursquare.model.entity.venue', $options);
+    }
 
-            $options = array(
-                'identity_key' => $context->getIdentityKey()
-            );
+    /**
+     * Gets multiple venues, filtered by state params
+     *
+     * @param Library\ModelContext $context
+     * @return Callable|Library\ObjectInterface
+     */
+    protected function getVenues(Library\ModelContext $context)
+    {
+        $state = $this->getState()->getValues();
+        if(!isset($state['ll']) && isset($state['latitude']) && isset($state['longitude'])){
+            $state['ll'] = $state['latitude'].','.$state['longitude'];
+        }
 
-			if($state->isUnique())
-			{
-				try{
-					$venue = $this->getGateway()->getVenue($state->id);
-				}catch(\Exception $e){
-					$venue = array();
-				}
+        try{
+            $response = $this->getClient()->getCommand('venues/search', $state)->execute();
+            $venues = isset($response['response']) && isset($response['response']['venues']) ? $response['response']['venues'] : array();
+        }catch(\Exception $e){
+            $venues = array();
+        }
 
-                $options['data'] = (array) $venue;
-			}
+        $options = array(
+            'identity_key' => $context->getIdentityKey(),
+            'data' => $venues
+        );
 
-            $this->_row = $this->getObject('com:foursquare.model.entity.venue', $options);
-		}
-
-		return $this->_row;
-	}
-
-
-    protected function getRowset(Library\ModelContext $context)
-	{
-		if(!$this->_rowset)
-		{
-			$state = $this->getState()->getValues();
-			if(!isset($state['ll']) && isset($state['latitude']) && isset($state['longitude'])){
-				$state['ll'] = $state['latitude'].','.$state['longitude'];
-			}
-			if(isset($state['search']) && !isset($state['query'])){
-				$state['query'] = $state['search'];
-				unset($state['search']);
-			}
-
-			try{
-				if(extension_loaded('apc'))
-				{
-					ksort($state);
-					$key = md5(serialize($state));
-					if(!$venues = apc_fetch('foursquare-venues.'.$key)){
-						$venues = $this->getGateway()->search($state);
-						apc_store('foursquare-venues.'.$key, $venues, 3600);
-					}
-				}else{
-					$venues = $this->getGateway()->search($state);
-				}
-			}catch(\Exception $e){
-				$venues = array();
-			}
-
-            // Each venue must be an array!
-            $venues = array_map(function($venue) { return (array) $venue; }, $venues);
-
-            $options = array(
-                'identity_key' => $context->getIdentityKey(),
-                'data' => $venues
-            );
-
-			$this->_rowset = $this->getObject('com:foursquare.model.entity.venues', $options);
-		}
-
-		return $this->_rowset;
-	}
+        return $this->getObject('com:foursquare.model.entity.venues', $options);
+    }
 }
