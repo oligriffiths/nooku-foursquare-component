@@ -28,13 +28,13 @@ class ModelVenues extends Library\ModelAbstract
         parent::__construct($config);
 
         $this->getState()
-            ->insert('id','string',null, true)
+            ->insert('id','string',null,true)
             ->insert('latitude','string')
             ->insert('longitude','string')
             ->insert('ll','string')
             ->insert('query','string')
             ->insert('radius','int')
-            ->insert('intent','string', 'browse')   //checkin, browse, global, match
+            ->insert('intent','string')   //checkin, browse, global, match
             ->insert('near','string')
             ->insert('limit','int', 10)
             ->insert('ne','float')
