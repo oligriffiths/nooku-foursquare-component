@@ -128,7 +128,8 @@ class ModelVenues extends Library\ModelAbstract
 
         $options = array(
             'identity_key' => $context->getIdentityKey(),
-            'data' => $venue
+            'data' => $venue,
+            'status' => Library\Database::STATUS_CREATED
         );
 
         return $this->getObject('com:foursquare.model.entity.venue', $options);
@@ -156,7 +157,8 @@ class ModelVenues extends Library\ModelAbstract
 
         $options = array(
             'identity_key' => $context->getIdentityKey(),
-            'data' => $venues
+            'data' => $venues,
+            'status' => Library\Database::STATUS_CREATED
         );
 
         return $this->getObject('com:foursquare.model.entity.venues', $options);
