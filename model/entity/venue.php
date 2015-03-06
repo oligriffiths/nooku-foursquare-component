@@ -9,7 +9,7 @@ namespace Oligriffiths\Component\Foursquare;
 
 use Nooku\Library;
 
-class ModelEntityVenue extends Library\ModelEntityRow
+class ModelEntityVenue extends Library\ModelEntityAbstract
 {
     /**
      * Gets the venues latitude if set

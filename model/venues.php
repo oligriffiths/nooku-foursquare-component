@@ -23,6 +23,12 @@ class ModelVenues extends Library\ModelAbstract
      */
     protected $_data;
 
+    /**
+     * Constructor
+     *
+     * @param  ObjectConfig $config    An optional ObjectConfig object with configuration options
+     */
+
     public function __construct(Library\ObjectConfig $config)
     {
         parent::__construct($config);
@@ -47,10 +53,18 @@ class ModelVenues extends Library\ModelAbstract
         $this->_client = $config->client;
     }
 
-
+    /**
+     * Initializes the options for the object
+     *
+     * Called from {@link __construct()} as a first step of object instantiation.
+     *
+     * @param   ObjectConfig $config An optional ObjectConfig object with configuration options
+     * @return  void
+     */
     protected function _initialize(Library\ObjectConfig $config)
     {
         $config->append(array(
+            'behaviors' => array('cacheable'),
             'client_id' => '',
             'client_secret' => '',
             'token' => null,
@@ -127,7 +141,7 @@ class ModelVenues extends Library\ModelAbstract
         }
 
         $options = array(
-            'identity_key' => $context->getIdentityKey(),
+            'identity_key' => 'id',
             'data' => $venue,
             'status' => Library\Database::STATUS_CREATED
         );
@@ -156,7 +170,7 @@ class ModelVenues extends Library\ModelAbstract
         }
 
         $options = array(
-            'identity_key' => $context->getIdentityKey(),
+            'identity_key' => 'id',
             'data' => $venues,
             'status' => Library\Database::STATUS_CREATED
         );
