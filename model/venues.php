@@ -64,7 +64,9 @@ class ModelVenues extends Library\ModelAbstract
     protected function _initialize(Library\ObjectConfig $config)
     {
         $config->append(array(
-            'behaviors' => array('cacheable'),
+            'behaviors' => array(
+                'cacheable' => array('cache_ttl' => 3600)
+            ),
             'client_id' => '',
             'client_secret' => '',
             'token' => null,
