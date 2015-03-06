@@ -12,6 +12,23 @@ use Nooku\Library;
 class ModelBehaviorCacheable extends Library\ModelBehaviorAbstract
 {
     /**
+     * Initializes the options for the object
+     *
+     * Called from {@link __construct()} as a first step of object instantiation.
+     *
+     * @param  ObjectConfig $config A ObjectConfig object with configuration options
+     * @return void
+     */
+    protected function _initialize(Library\ObjectConfig $config)
+    {
+        $config->append(array(
+            'cache_prefix' => 'model-cache',
+            'cache_ttl' => 0,
+        ));
+        parent::_initialize($config);
+    }
+
+    /**
      * If APC is not loaded, behavior is disabled
      *
      * @return bool
@@ -60,6 +77,7 @@ class ModelBehaviorCacheable extends Library\ModelBehaviorAbstract
         $key = $this->_buildCacheKey($context->getState());
 
         $entity = $context->getEntity();
+
         $data = array(
             'identifier'    => (string) $entity->getIdentifier(),
             'identity_key'  => $entity->getIdentityKey(),
@@ -67,7 +85,7 @@ class ModelBehaviorCacheable extends Library\ModelBehaviorAbstract
             'status'        => $entity->getStatus()
         );
 
-        apc_store($key, $data);
+        apc_store($key, $data, $this->getConfig()->cache_ttl);
     }
 
     /**
@@ -84,6 +102,6 @@ class ModelBehaviorCacheable extends Library\ModelBehaviorAbstract
         $query = http_build_query($values);
         $identifier = $this->getMixer()->getIdentifier();
 
-        return 'model-cache:'.$identifier.'?'.$query;
+        return $this->getConfig()->cache_prefix.':'.$identifier.'?'.$query;
     }
 }
