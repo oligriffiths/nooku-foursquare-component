@@ -12,13 +12,36 @@ use Nooku\Library;
 class ModelEntityVenue extends Library\ModelEntityAbstract
 {
     /**
+     * Gets a value using dot syntax
+     *
+     * @param $key
+     * @return null|mixed
+     */
+    public function getValue($key)
+    {
+        $keys = explode('.', $key);
+        $key = array_shift($keys);
+
+        $value = $this->$key;
+
+        foreach($keys AS $key){
+            if(is_null($value)) break;
+            else if(is_scalar($value)) $value = null;
+            else if(is_array($value) && isset($value[$key])) $value = $value[$key];
+            else if(is_object($value) && isset($value->$key)) $value = $value->$key;
+        }
+
+        return $value;
+    }
+
+    /**
      * Gets the venues latitude if set
      *
      * @return float
      */
     public function getLatitude()
     {
-        return (float) ($this->location && isset($this->location['lat']) ? $this->location['lat'] : 0);
+        return (float) $this->getValue('location.lat');
     }
 
     /**
@@ -28,7 +51,7 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getLongitude()
     {
-        return (float) ($this->location && isset($this->location['lng']) ? $this->location['lng'] : 0);
+        return (float) $this->getValue('location.lng');
     }
 
     /**
@@ -38,17 +61,17 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getAddress()
     {
-        return $this->location && isset($this->location['address']) ? $this->location['address'] : null;
+        return $this->getValue('location.address');
     }
 
     /**
      * Gets the city
      *
-     * @return null|string
+     * @return null|stringx
      */
     public function getCity()
     {
-        return $this->location && isset($this->location['city']) ? $this->location['city'] : null;
+        return $this->getValue('location.city');
     }
 
     /**
@@ -58,7 +81,7 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getState()
     {
-        return $this->location && isset($this->location['state']) ? $this->location['state'] : null;
+        return $this->getValue('location.state');
     }
 
     /**
@@ -68,7 +91,7 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getPostalcode()
     {
-        return $this->location && isset($this->location['postalCode']) ? $this->location['postalCode'] : null;
+        return $this->getValue('location.postalCode');
     }
 
     /**
@@ -78,6 +101,6 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getCountry()
     {
-        return $this->location && isset($this->location['cc']) ? $this->location['cc'] : null;
+        return $this->getValue('location.cc');
     }
 }
