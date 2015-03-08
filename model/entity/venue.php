@@ -68,7 +68,7 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getPostalcode()
     {
-        return $this->location && isset($this->location['postal_code']) ? $this->location['postal_code'] : null;
+        return $this->location && isset($this->location['postalCode']) ? $this->location['postalCode'] : null;
     }
 
     /**
