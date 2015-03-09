@@ -11,7 +11,7 @@ use Nooku\Library;
 use Jcroll\FoursquareApiClient\Client\FoursquareClient;
 
 
-class ModelVenues extends Library\ModelAbstract
+abstract class ModelVenuesABstract extends Library\ModelAbstract
 {
     /**
      * @var FoursquareClient
@@ -35,20 +35,16 @@ class ModelVenues extends Library\ModelAbstract
 
         $this->getState()
             ->insert('id','string',null,true)
-            ->insert('latitude','string')
-            ->insert('longitude','string')
+            ->insert('latitude','float')
+            ->insert('longitude','float')
             ->insert('ll','string')
-            ->insert('query','string')
-            ->insert('radius','int')
-            ->insert('intent','string')   //checkin, browse, global, match
             ->insert('near','string')
+            ->insert('llAcc','int')
+            ->insert('alt','int')
+            ->insert('altAcc','int')
+            ->insert('query','string')
             ->insert('limit','int', 10)
-            ->insert('ne','float')
-            ->insert('sw','float')
-            ->insert('categoryId','alnum')
-            ->insert('url','string')
-            ->insert('linkedId','int')
-            ->insert('providerId','int');
+            ->insert('radius','int');
 
         $this->_client = $config->client;
     }
@@ -65,7 +61,7 @@ class ModelVenues extends Library\ModelAbstract
     {
         $config->append(array(
             'behaviors' => array(
-                'cacheable' => array('cache_ttl' => 3600)
+//                'cacheable' => array('cache_ttl' => 3600)
             ),
             'client_id' => '',
             'client_secret' => '',
@@ -162,11 +158,17 @@ class ModelVenues extends Library\ModelAbstract
         $state = $this->getState()->getValues();
         if(!isset($state['ll']) && isset($state['latitude']) && isset($state['longitude'])){
             $state['ll'] = $state['latitude'].','.$state['longitude'];
+        }else{
+            unset($state['latitude']);
+            unset($state['longitude']);
         }
 
         try{
-            $response = $this->getClient()->getCommand('venues/search', $state)->execute();
-            $venues = isset($response['response']) && isset($response['response']['venues']) ? $response['response']['venues'] : array();
+            $response = $this->getClient()->getCommand('venues/'.$this->getIdentifier()->name, $state)->execute();
+
+            if(method_exists($this, '_getVenuesFromResponse')) $venues = $this->_getVenuesFromResponse($response);
+            else $venues = isset($response['response']) && isset($response['response']['venues']) ? $response['response']['venues'] : array();
+
         }catch(\Exception $e){
             $venues = array();
         }
