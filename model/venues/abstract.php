@@ -61,7 +61,7 @@ abstract class ModelVenuesABstract extends Library\ModelAbstract
     {
         $config->append(array(
             'behaviors' => array(
-//                'cacheable' => array('cache_ttl' => 3600)
+                'cacheable' => array('cache_ttl' => 3600)
             ),
             'client_id' => '',
             'client_secret' => '',
