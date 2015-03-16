@@ -103,4 +103,14 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
     {
         return $this->getValue('location.cc');
     }
+
+    /**
+     * Gets the formatted address
+     *
+     * @return array
+     */
+    public function getFormattedAddress()
+    {
+        return $this->getValue('location.formattedAddress');
+    }
 }
