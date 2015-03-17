@@ -121,6 +121,14 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getHours()
     {
-        return (array) $this->getValue('hours.timeframes');
+        $data = (array) $this->getValue('hours.timeframes');
+        $hours = array();
+
+        foreach($data AS $d){
+            $open = isset($d['open']) && isset($d['open'][0]) ? $d['open'][0] : null;
+            $hours[] = array('days' => $d['days'], 'hours' => $open);
+        }
+
+        return $hours;
     }
 }
