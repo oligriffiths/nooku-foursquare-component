@@ -113,4 +113,14 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
     {
         return $this->getValue('location.formattedAddress');
     }
+
+    /**
+     * Gets the times the venue is open
+     *
+     * @return array
+     */
+    public function getHours()
+    {
+        return (array) $this->getValue('hours.timeframes');
+    }
 }
