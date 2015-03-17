@@ -27,8 +27,8 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
         foreach($keys AS $key){
             if(is_null($value)) break;
             else if(is_scalar($value)) $value = null;
-            else if(is_array($value) && isset($value[$key])) $value = $value[$key];
-            else if(is_object($value) && isset($value->$key)) $value = $value->$key;
+            else if(is_array($value)) $value = isset($value[$key]) ? $value[$key] : null;
+            else if(is_object($value)) $value = isset($value->$key) ? $value->$key : null;
         }
 
         return $value;
