@@ -125,8 +125,10 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
         $hours = array();
 
         foreach($data AS $d){
-            $open = isset($d['open']) && isset($d['open'][0]) ? $d['open'][0] : null;
-            $hours[] = array('days' => $d['days'], 'hours' => $open);
+            $open = isset($d['open']) ? $d['open'] : null;
+            if(!$open || !is_array($open)) continue;
+
+            $hours[] = array('days' => $d['days'], 'hours' => array_values($open));
         }
 
         return $hours;
