@@ -128,6 +128,10 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
             $open = isset($d['open']) ? $d['open'] : null;
             if(!$open || !is_array($open)) continue;
 
+            $open = array_map(function($hour){
+                return isset($hour->renderedTime) ? $hour->renderedTime : null;
+            }, $open);
+
             $hours[] = array('days' => $d['days'], 'hours' => array_values($open));
         }
 
