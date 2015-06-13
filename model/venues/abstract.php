@@ -164,26 +164,21 @@ abstract class ModelVenuesAbstract extends Library\ModelAbstract
             unset($state['longitude']);
         }
 
-        try{
-            $command = $this->getClient()->getCommand('venues/'.$this->getIdentifier()->name, $state);
+        $command = $this->getClient()->getCommand('venues/'.$this->getIdentifier()->name, $state);
 
-            //The JCroll library isn't in sync with the foursquare API, this is a patch
-            //@TODO - Swap out JCroll for another foursquare lib
-            $operation = $command->getOperation();
-            $missing_params = array_diff_key($state, $operation->getParams());
-            foreach($missing_params AS $param => $value){
-                $operation->addParam(new Parameter(array('name' => $param, 'location' => 'query')));
-            }
-
-            //Execute the request
-            $response = $command->execute();
-
-            if(method_exists($this, '_getVenuesFromResponse')) $venues = $this->_getVenuesFromResponse($response);
-            else $venues = isset($response['response']) && isset($response['response']['venues']) ? $response['response']['venues'] : array();
-
-        }catch(\Exception $e){
-            $venues = array();
+        //The JCroll library isn't in sync with the foursquare API, this is a patch
+        //@TODO - Swap out JCroll for another foursquare lib
+        $operation = $command->getOperation();
+        $missing_params = array_diff_key($state, $operation->getParams());
+        foreach($missing_params AS $param => $value){
+            $operation->addParam(new Parameter(array('name' => $param, 'location' => 'query')));
         }
+
+        //Execute the request
+        $response = $command->execute();
+
+        if(method_exists($this, '_getVenuesFromResponse')) $venues = $this->_getVenuesFromResponse($response);
+        else $venues = isset($response['response']) && isset($response['response']['venues']) ? $response['response']['venues'] : array();
 
         $options = array(
             'identity_key' => 'id',
