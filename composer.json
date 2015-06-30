@@ -5,7 +5,7 @@
     "keywords": ["nooku", "foursquare", "component"],
     "license": "GPL",
     "require": {
-        "nooku/installer": "dev-develop",
+        "nooku/installer": "dev-master",
         "jcroll/foursquare-api-client": "dev-master"
     },
     "autoload": {
