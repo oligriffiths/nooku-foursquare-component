@@ -134,14 +134,18 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
                 }
 
                 //Convert foursquare format to HH:mm format
-                $hour['renderedTime'] = str_replace('Noon','12:00 PM', isset($hour['renderedTime']));
-                $hour['renderedTime'] = str_replace('Midnight','00:00 AM', isset($hour['renderedTime']));
+                $hour['renderedTime'] = str_replace('Noon','12:00 PM', $hour['renderedTime']);
+                $hour['renderedTime'] = str_replace('Midnight','00:00 AM', $hour['renderedTime']);
 
                 //Split format
                 $parts = explode('-', $hour['renderedTime']);
 
-                $open = new \DateTime($parts[0]);
-                $close = new \DateTime($parts[1]);
+                try{
+                    $open = new \DateTime($parts[0]);
+                    $close = new \DateTime($parts[1]);
+                }catch(\Exception $e){
+                    return null;
+                }
 
                 return array('open' => $open->format('H:i'), 'close' => $close->format('H:i'));
             }, $open);
