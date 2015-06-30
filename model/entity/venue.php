@@ -138,7 +138,7 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
                 $hour['renderedTime'] = str_replace('Midnight','00:00 AM', $hour['renderedTime']);
 
                 //Split format
-                $parts = explode('-', $hour['renderedTime']);
+                $parts = preg_split('#[^0-9:\sA-Z]+#', $hour['renderedTime']);
 
                 try{
                     $open = new \DateTime($parts[0]);
