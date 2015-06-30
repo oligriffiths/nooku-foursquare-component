@@ -129,10 +129,27 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
             if(!$open || !is_array($open)) continue;
 
             $open = array_map(function($hour){
-                return isset($hour['renderedTime']) ? $hour['renderedTime'] : null;
+                if(!isset($hour['renderedTime'])){
+                    return null;
+                }
+
+                //Convert foursquare format to HH:mm format
+                $hour['renderedTime'] = str_replace('Noon','12:00 PM', isset($hour['renderedTime']));
+                $hour['renderedTime'] = str_replace('Midnight','00:00 AM', isset($hour['renderedTime']));
+
+                //Split format
+                $parts = explode('-', $hour['renderedTime']);
+
+                $open = new \DateTime($parts[0]);
+                $close = new \DateTime($parts[1]);
+
+                return array('open' => $open->format('H:i'), 'close' => $close->format('H:i'));
             }, $open);
 
-            $hours[] = array('days' => $d['days'], 'hours' => array_filter($open));
+            $hours[] = array(
+                'days' => $d['days'],
+                'hours' => array_filter($open)
+            );
         }
 
         return $hours;
