@@ -125,9 +125,24 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
         $hours = array();
 
         foreach($data AS $d){
+            
             $open = isset($d['open']) ? $d['open'] : null;
             if(!$open || !is_array($open)) continue;
 
+            //Convert days to 0-6
+            $days = array_map(function($day){
+
+                $days = array('mon','tue','wed','thur','fri','sat','sun');
+                return array_search(strtolower($day), $days);
+
+            }, preg_split('#[^0-9:\sA-Z]+#', $d['days']));
+
+            $days = array_filter($days);
+            if(empty($days)){
+                continue;
+            }
+
+            //Format hours
             $open = array_map(function($hour){
                 if(!isset($hour['renderedTime'])){
                     return null;
@@ -150,9 +165,11 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
                 return array('open' => $open->format('H:i'), 'close' => $close->format('H:i'));
             }, $open);
 
+            $hours = array_filter($open);
+
             $hours[] = array(
-                'days' => $d['days'],
-                'hours' => array_filter($open)
+                'days' => $days,
+                'hours' => $days
             );
         }
 
