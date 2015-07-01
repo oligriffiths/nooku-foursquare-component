@@ -168,11 +168,14 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
                 return array('open' => $open->format('H:i'), 'close' => $close->format('H:i'));
             }, $open);
 
-            $hours = array_filter($open);
+            $open = array_filter($open);
+            if(empty($open)){
+                continue;
+            }
 
             $hours[] = array(
                 'days' => $days,
-                'hours' => $days
+                'hours' => $open
             );
         }
 
