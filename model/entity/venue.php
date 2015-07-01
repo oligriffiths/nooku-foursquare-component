@@ -174,7 +174,7 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
             }
 
             $hours[] = array(
-                'days' => $days,
+                'days' => array_values($days),
                 'hours' => $open
             );
         }
