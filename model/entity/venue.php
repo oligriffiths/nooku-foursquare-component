@@ -121,12 +121,12 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
      */
     public function getHours()
     {
-        $data = (array) $this->getValue('hours.timeframes');
+        $timeframes = (array) $this->getValue('hours.timeframes');
         $hours = array();
 
-        foreach($data AS $d){
+        foreach($timeframes AS $timeframe){
 
-            $open = isset($d['open']) ? $d['open'] : null;
+            $open = isset($timeframe['open']) ? $timeframe['open'] : null;
             if(!$open || !is_array($open)) continue;
 
             //Convert days to 0-6
@@ -135,7 +135,7 @@ class ModelEntityVenue extends Library\ModelEntityAbstract
                 $days = array('mon','tue','wed','thur','fri','sat','sun');
                 return array_search(strtolower(trim($day)), $days);
 
-            }, preg_split('#[^A-Za-z\s]+#', $d['days']));
+            }, preg_split('#[^A-Za-z\s]+#', $timeframe['days']));
 
             $days = array_filter($days, function($a){
                 return $a !== false;
