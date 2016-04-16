@@ -125,6 +125,37 @@ abstract class ModelVenuesAbstract extends Library\ModelAbstract
     }
 
     /**
+     * Create a new entity for the data source
+     * Overridden to ensure identifier is set correctly
+     *
+     * @param Library\ModelContext $context A model context object
+     * @return  Library\ModelEntityInterface The entity
+     */
+    protected function _actionCreate(Library\ModelContext $context)
+    {
+        //Get the data
+        $data = Library\ModelContext::unbox($context->entity);
+
+        //Create the entity identifier
+        $identifier = $this->getIdentifier()->toArray();
+        $identifier['path'] = array('model', 'entity');
+        $identifier['name'] = 'venues';
+
+        if(!is_numeric(key($data))) {
+            $identifier['name'] = Library\StringInflector::singularize($identifier['name']);
+        } else {
+            $identifier['name'] = Library\StringInflector::pluralize($identifier['name']);
+        }
+
+        $options = array(
+            'data'         => $data,
+            'identity_key' => $context->getIdentityKey()
+        );
+
+        return $this->getObject($identifier, $options);
+    }
+
+    /**
      * Gets a single venue by ID
      *
      * @param Library\ModelContext $context
